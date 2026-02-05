@@ -1,0 +1,24 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-update-the-shop-authentication-ui-so-the-super-admin-portal-is-reachable-from-the-shop-login-screen-by-adding-a-clearly-visible-super-admin-login-navigation-control-that-routes-to-auth-admin-login",
+      "featureTitle": "Update the shop authentication UI so the Super Admin portal is reachable from the Shop Login screen by adding a clearly visible \"Super Admin Login\" navigation control that routes to \"/auth/admin/login\".",
+      "files": [
+        "frontend/src/pages/auth/ShopLoginPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-16"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

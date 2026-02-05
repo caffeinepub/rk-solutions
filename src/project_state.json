@@ -1,0 +1,237 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 9,
+  "summary": "MVP for RK Solutions: a SaaS-based, multi-tenant inventory management system with an offline-first Android app (auto-sync + conflict handling) and a desktop-friendly web app. Each shop is its own tenant with email/password auth, product CRUD, stock tracking with sale-triggered decrements, low-stock alerts, search/filtering, manual stock-in, and a simple dashboard. A separate super-admin can manage tenant accounts/users (suspend/reactivate, reset passwords, view sign-ups/access logs) without accessing shop inventory.",
+  "architectural_notes": [
+    "Cross-platform MVP: offline-first Android app + desktop-friendly web app + cloud SaaS backend.",
+    "Multi-tenant architecture where each shop is a tenant; enforce strict data partitioning by shopId/tenantId.",
+    "Super-admin can manage tenant accounts and users but must not be able to view tenant inventory data.",
+    "Offline sync: Android stores changes locally and syncs batched diffs when online; define conflict resolution (MVP: last-write-wins or timestamp-based).",
+    "Stock levels update automatically when sales are recorded; low-stock/out-of-stock states derived from quantity vs thresholds.",
+    "Explicitly out of MVP: barcode scanning, multi-warehouse, advanced RBAC beyond shop user + super-admin, advanced analytics/reporting, external accounting/POS integrations beyond stock updates.",
+    "Shop (tenant) sign-up flow is gated by Internet Identity (II); II must be configured/enabled in the deployment to allow new shop creation.",
+    "Tenant/shop creation must be self-service for shops (shop sign-up creates a new tenant) and must not require super-admin privileges; super-admin only manages existing tenants.",
+    "Web UI must provide an explicit, discoverable entry point to the Super Admin login/portal (not hidden behind subtle/unstyled links)."
+  ],
+  "known_issues": [
+    "Offline conflict resolution may cause overwrites in edge cases; needs a clear MVP policy and user expectations.",
+    "Shop sign-up is currently blocked until Internet Identity (II) authentication is configured/enabled.",
+    "Shop self-sign-up/tenant creation is returning \"Unauthorized: Only super-admins can perform this action\"—tenant creation is incorrectly restricted to super-admin.",
+    "Super Admin Login entry/link is not visible on the login screen in the current build; users cannot access the super-admin portal from the UI."
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-implement-email-password-authentication-for-shop-users-and-for-the-super-admin-including-sign-up-for-new-shops-tenant-creation-and-login-logout-flows-with-secure-password-storage-salted-hashing-and-session-token-handling-suitable-for-a-web-client",
+      "title": "Implement email+password authentication for shop users and for the super-admin, including sign-up for new shops (tenant creation) and login/logout flows, with secure password storage (salted hashing) and session/token handling suitable for a web client.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-product-crud-for-shop-users-create-view-list-edit-delete-with-quantity-tracking-low-stock-threshold-and-computed-stock-status-in-stock-low-stock-out-of-stock",
+      "title": "Implement product CRUD for shop users (create, view/list, edit, delete) with quantity tracking, low-stock threshold, and computed stock status (in stock / low stock / out of stock).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-sales-entry-and-automatic-stock-out-updates-creating-a-sale-decrements-product-quantity-prevents-negative-stock-and-marks-product-as-out-of-stock-when-quantity-reaches-0-also-trigger-low-stock-state-when-crossing-the-threshold",
+      "title": "Implement sales entry and automatic stock-out updates: creating a sale decrements product quantity, prevents negative stock, and marks product as out-of-stock when quantity reaches 0; also trigger low-stock state when crossing the threshold.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-manual-stock-in-updates-as-explicit-stock-movement-records-that-increment-product-quantity-with-a-simple-ui-flow-for-shop-users-to-add-stock-and-see-the-resulting-quantity",
+      "title": "Implement manual stock-in updates as explicit stock movement records that increment product quantity, with a simple UI flow for shop users to add stock and see the resulting quantity.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-low-stock-threshold-alerts-as-in-app-notifications-for-shop-users-no-email-sms-show-a-notification-list-indicator-for-products-currently-low-out-of-stock-and-newly-transitioned-into-low-out-of-stock-since-last-view",
+      "title": "Implement low-stock threshold alerts as in-app notifications for shop users (no email/SMS): show a notification list/indicator for products currently low/out-of-stock and newly transitioned into low/out-of-stock since last view.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-basic-product-search-and-filtering-in-the-web-ui-by-name-text-search-and-by-stock-status-all-in-stock-low-stock-out-of-stock",
+      "title": "Implement basic product search and filtering in the web UI (by name text search and by stock status: all / in stock / low stock / out of stock).",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-simple-shop-dashboard-screen-showing-total-products-low-stock-count-and-out-of-stock-count-with-navigation-to-products-and-quick-links-to-address-low-out-of-stock-items",
+      "title": "Implement a simple shop dashboard screen showing total products, low-stock count, and out-of-stock count, with navigation to products and quick links to address low/out-of-stock items.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-mvp-offline-first-mode-for-the-web-client-when-offline-allow-creating-editing-products-recording-sales-and-stock-in-updates-by-queueing-operations-locally-when-reconnecting-automatically-sync-queued-operations-to-the-backend-with-a-documented-mvp-conflict-strategy-last-write-wins-for-product-edits-and-ordered-replay-for-sales-stock-movements",
+      "title": "Implement an MVP offline-first mode for the web client: when offline, allow creating/editing products, recording sales, and stock-in updates by queueing operations locally; when reconnecting, automatically sync queued operations to the backend with a documented MVP conflict strategy (last-write-wins for product edits, and ordered replay for sales/stock movements).",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-super-admin-web-portal-with-view-all-shop-accounts-suspend-reactivate-shops-reset-user-passwords-and-view-sign-ups-access-logs-while-preventing-any-inventory-visibility",
+      "title": "Implement a super-admin web portal with: view all shop accounts, suspend/reactivate shops, reset user passwords, and view sign-ups/access logs, while preventing any inventory visibility.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-coherent-rk-solutions-visual-theme-and-apply-it-consistently-across-the-web-app-authentication-shop-portal-admin-portal-using-a-clean-modern-desktop-friendly-layout-and-leveraging-the-provided-rk-solutions-logo-colors-avoid-a-blue-purple-default-palette",
+      "title": "Create a coherent RK Solutions visual theme and apply it consistently across the web app (authentication, shop portal, admin portal), using a clean, modern, desktop-friendly layout and leveraging the provided RK Solutions logo colors; avoid a blue+purple default palette.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-the-rk-solutions-logo-as-a-static-asset-and-render-it-in-the-web-app-e-g-top-left-header-and-authentication-screens",
+      "title": "Add the RK Solutions logo as a static asset and render it in the web app (e.g., top-left header and authentication screens).",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-shop-sign-up-mutation-frontend-src-hooks-usequeries-ts-usecreateshop-to-match-the-new-backend-behavior-by-removing-any-dependency-on-calling-the-admin-only-assignusertoshop-during-self-sign-up-and-ensure-the-ui-navigates-to-shop-after-a-successful-shop-creation",
+      "title": "Update the frontend shop sign-up mutation (frontend/src/hooks/useQueries.ts useCreateShop) to match the new backend behavior by removing any dependency on calling the admin-only assignUserToShop during self sign-up, and ensure the UI navigates to /shop after a successful shop creation.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-shop-authentication-ui-so-the-super-admin-portal-is-reachable-from-the-shop-login-screen-by-adding-a-clearly-visible-super-admin-login-navigation-control-that-routes-to-auth-admin-login",
+      "title": "Update the shop authentication UI so the Super Admin portal is reachable from the Shop Login screen by adding a clearly visible \"Super Admin Login\" navigation control that routes to \"/auth/admin/login\".",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Multi-tenant shop sign-up and tenant isolation (each shop is a tenant; super-admin cannot access shop inventory)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Shop user authentication (email + password) for Android and Web",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Product management (create/view/edit/delete) with quantity + stock status + low-stock threshold",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Sales entry that automatically decrements stock and marks out-of-stock when quantity reaches 0",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Manual stock-in updates (stock movements)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Low-stock threshold alerts (in-app notifications)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Basic product search and filtering",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Simple dashboard (total items, low-stock items, out-of-stock items)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Android offline-first mode with local storage for product/sale/stock changes and queued operations",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Automatic sync on reconnect with MVP conflict resolution strategy (e.g., last-write-wins)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Super-admin portal: view shops, suspend/reactivate shops, reset user passwords, monitor sign-ups and access logs",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Implement multi-tenant backend domain model and access control for shops, users, products, sales, stock movements, and audit logs, ensuring strict tenant isolation (shop users can only access their own shop) and ensuring super-admin can manage shop accounts/users but cannot read any shop inventory data.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Enable/configure Internet Identity authentication to unblock shop (tenant) sign-up flow",
+      "reqIds": [],
+      "status": "in_progress"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Update the backend shop creation flow so a non-admin (regular shop user) can create their own shop during the shop sign-up flow without triggering \"Unauthorized: Only super-admins can perform this action\".",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "In backend/main.mo, modify shop creation so that when a non-admin creates a shop for themselves, the caller is automatically assigned to that newly created shop (i.e., userProfiles[caller].shopId is set to the new shopId) as part of the same operation, without requiring a super-admin-only call.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Make Super Admin portal entry point visible in the web UI (move/add a clear “Super Admin Login” button/link on the auth/login screen, e.g., header/top-right or prominent placement).",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "RK Solutions",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

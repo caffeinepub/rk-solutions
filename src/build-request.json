@@ -1,0 +1,40 @@
+{
+  "kind": "build_request",
+  "title": "Make Super Admin Login entry visible on Shop Login screen",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-16",
+      "text": "Update the shop authentication UI so the Super Admin portal is reachable from the Shop Login screen by adding a clearly visible \"Super Admin Login\" navigation control that routes to \"/auth/admin/login\".",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4",
+          "msg-8",
+          "msg-9"
+        ],
+        "quotes": [
+          "Super Admin Login isn't there",
+          "move it"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On \"/auth/shop/login\", a clearly visible control labeled \"Super Admin Login\" is present without needing to scroll.",
+        "Activating \"Super Admin Login\" navigates to \"/auth/admin/login\" and renders the existing AdminLoginPage.",
+        "Existing Shop Login and Create New Shop Account actions continue to work as before."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not edit files under frontend/src/components/ui (Shadcn components are read-only).",
+    "Keep all user-facing text in English."
+  ],
+  "nonGoals": [
+    "Do not change backend authentication/authorization logic.",
+    "Do not change admin portal functionality beyond making its entry point visible."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

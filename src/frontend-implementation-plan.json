@@ -1,0 +1,23 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Expose Super Admin Login entry on Shop Login screen",
+  "requirements": [
+    {
+      "id": "REQ-16",
+      "summary": "Add a clearly visible \"Super Admin Login\" control on the Shop Login screen that navigates to /auth/admin/login without affecting existing shop auth actions.",
+      "acceptanceCriteria": [
+        "On \"/auth/shop/login\", a clearly visible control labeled \"Super Admin Login\" is present without needing to scroll.",
+        "Activating \"Super Admin Login\" navigates to \"/auth/admin/login\" and renders the existing AdminLoginPage.",
+        "Existing Shop Login and Create New Shop Account actions continue to work as before."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/auth/ShopLoginPage.tsx",
+          "operation": "modify",
+          "description": "Add a prominent navigation control labeled \"Super Admin Login\" (e.g., an additional Button in the existing CardContent) that uses the existing TanStack Router navigate() to route to \"/auth/admin/login\"; keep all user-facing text in English and do not modify any files under frontend/src/components/ui."
+        }
+      ]
+    }
+  ]
+}

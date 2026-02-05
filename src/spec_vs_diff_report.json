@@ -1,0 +1,14 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-05T19:46:14.573Z",
+  "summary": "REQ-16 appears implemented: ShopLoginPage now includes a visible \"Super Admin Login\" control that navigates to \"/auth/admin/login\" while preserving existing shop login and signup actions. No unrequested functional changes are clearly evidenced beyond this UI addition; other modified files appear to be documentation/state summaries.",
+  "missing_requirements": [],
+  "hallucinated_features": [],
+  "confidence": 0.86,
+  "changed_files": [
+    "frontend-file-summaries.txt",
+    "frontend/src/pages/auth/ShopLoginPage.tsx",
+    "project_state.json"
+  ]
+}
