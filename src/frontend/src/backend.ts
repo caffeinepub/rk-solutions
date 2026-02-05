@@ -129,6 +129,7 @@ export interface StockMovement {
 export interface UserProfile {
     shopId?: ShopId;
     name: string;
+    isSuperAdmin: boolean;
     email: string;
 }
 export interface ShopDashboard {
@@ -166,6 +167,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     reactivateShop(shopId: ShopId): Promise<void>;
+    resetSuperAdmin(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     suspendShop(shopId: ShopId): Promise<void>;
     updateProduct(productId: ProductId, name: string, description: string, lowStockThreshold: bigint): Promise<void>;
@@ -482,6 +484,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async resetSuperAdmin(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.resetSuperAdmin();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.resetSuperAdmin();
+            return result;
+        }
+    }
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
@@ -557,15 +573,18 @@ function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function from_candid_record_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     shopId: [] | [_ShopId];
     name: string;
+    isSuperAdmin: boolean;
     email: string;
 }): {
     shopId?: ShopId;
     name: string;
+    isSuperAdmin: boolean;
     email: string;
 } {
     return {
         shopId: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.shopId)),
         name: value.name,
+        isSuperAdmin: value.isSuperAdmin,
         email: value.email
     };
 }
@@ -617,15 +636,18 @@ function to_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Arra
 function to_candid_record_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     shopId?: ShopId;
     name: string;
+    isSuperAdmin: boolean;
     email: string;
 }): {
     shopId: [] | [_ShopId];
     name: string;
+    isSuperAdmin: boolean;
     email: string;
 } {
     return {
         shopId: value.shopId ? candid_some(value.shopId) : candid_none(),
         name: value.name,
+        isSuperAdmin: value.isSuperAdmin,
         email: value.email
     };
 }

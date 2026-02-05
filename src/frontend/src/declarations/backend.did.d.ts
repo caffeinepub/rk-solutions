@@ -50,6 +50,7 @@ export type Time = bigint;
 export interface UserProfile {
   'shopId' : [] | [ShopId],
   'name' : string,
+  'isSuperAdmin' : boolean,
   'email' : string,
 }
 export type UserRole = { 'admin' : null } |
@@ -81,6 +82,7 @@ export interface _SERVICE {
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'reactivateShop' : ActorMethod<[ShopId], undefined>,
+  'resetSuperAdmin' : ActorMethod<[], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'suspendShop' : ActorMethod<[ShopId], undefined>,
   'updateProduct' : ActorMethod<[ProductId, string, string, bigint], undefined>,

@@ -20,6 +20,7 @@ export default function ProfileSetupModal() {
       name: name.trim(),
       email: email.trim(),
       shopId: profile?.shopId,
+      isSuperAdmin: profile?.isSuperAdmin ?? false,
     };
 
     saveProfile.mutate(newProfile);

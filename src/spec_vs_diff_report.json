@@ -1,14 +1,39 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T19:46:14.573Z",
-  "summary": "REQ-16 appears implemented: ShopLoginPage now includes a visible \"Super Admin Login\" control that navigates to \"/auth/admin/login\" while preserving existing shop login and signup actions. No unrequested functional changes are clearly evidenced beyond this UI addition; other modified files appear to be documentation/state summaries.",
-  "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.86,
+  "generatedAt": "2026-02-05T20:08:57.202Z",
+  "summary": "Frontend changes add explicit admin shop-list error UI and expose a “Recover Super Admin Access” control that calls a new `useResetSuperAdmin` hook. Backend changes add an `isSuperAdmin` field to `UserProfile` and introduce upgrade migration scaffolding, but the diff summary does not show any new backend bootstrap/reset method that can promote the caller to super-admin when no super-admin exists, nor the required rejection behavior when one already exists.",
+  "missing_requirements": [
+    {
+      "id": "REQ-17",
+      "requirement": "Add a backend bootstrap-only super-admin reset method that promotes the caller to super-admin only when there is currently no super-admin configured; otherwise reject/trap with a clear English error; after bootstrap, admin-only endpoints succeed for that principal.",
+      "reason": "The diff summary shows `UserProfile` gaining an `isSuperAdmin` field and a migration to default it to false, but does not show any newly added backend method that performs the bootstrap promotion, checks for existing super-admins, or produces the specified English error message on disallowed use.",
+      "evidence": [
+        "backend/main.mo",
+        "backend/migration.mo"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Added/changed end-user profile setup flow (ProfileSetupModal) and backend profile-saving logic to preserve `shopId`/`isSuperAdmin`, plus added toast messaging for profile save.",
+      "reason": "REQ-17/REQ-18 focus on super-admin bootstrap recovery and admin shop list error visibility. The diff includes additional profile UI and persistence behavior not mentioned in the request.",
+      "evidence": [
+        "frontend/src/components/auth/ProfileSetupModal.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "confidence": 0.67,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/pages/auth/ShopLoginPage.tsx",
+    "frontend/src/components/auth/ProfileSetupModal.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/admin/AdminHomePage.tsx",
+    "frontend/src/pages/admin/ShopsAdminPage.tsx",
     "project_state.json"
   ]
 }

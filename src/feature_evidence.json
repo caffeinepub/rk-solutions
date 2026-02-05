@@ -2,10 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-shop-authentication-ui-so-the-super-admin-portal-is-reachable-from-the-shop-login-screen-by-adding-a-clearly-visible-super-admin-login-navigation-control-that-routes-to-auth-admin-login",
-      "featureTitle": "Update the shop authentication UI so the Super Admin portal is reachable from the Shop Login screen by adding a clearly visible \"Super Admin Login\" navigation control that routes to \"/auth/admin/login\".",
+      "featureId": "feature-update-the-super-admin-web-ui-to-support-the-admin-reset-bootstrap-flow-and-make-authorization-failures-visible-when-shops-cannot-be-loaded",
+      "featureTitle": "Update the Super Admin web UI to support the admin reset/bootstrap flow and make authorization failures visible when shops cannot be loaded.",
       "files": [
-        "frontend/src/pages/auth/ShopLoginPage.tsx"
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/admin/AdminHomePage.tsx",
+        "frontend/src/pages/admin/ShopsAdminPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,7 +18,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-18"
       ],
       "confidence": "high"
     }

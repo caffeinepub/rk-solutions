@@ -202,10 +202,11 @@ export function useGetAllShops() {
   return useQuery<Shop[]>({
     queryKey: ['allShops'],
     queryFn: async () => {
-      if (!actor) return [];
+      if (!actor) throw new Error('Actor not available');
       return actor.getAllShops();
     },
     enabled: !!actor && !actorFetching,
+    retry: false,
   });
 }
 
@@ -279,5 +280,26 @@ export function useIsCallerAdmin() {
       return actor.isCallerAdmin();
     },
     enabled: !!actor && !actorFetching,
+  });
+}
+
+export function useResetSuperAdmin() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.resetSuperAdmin();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['isCallerAdmin'] });
+      queryClient.invalidateQueries({ queryKey: ['allShops'] });
+      toast.success('Super admin access granted successfully');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to reset super admin: ${error.message}`);
+    },
   });
 }

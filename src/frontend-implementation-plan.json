@@ -1,21 +1,32 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Expose Super Admin Login entry on Shop Login screen",
+  "title": "Super Admin UI bootstrap/reset + improved shop list authorization error visibility",
   "requirements": [
     {
-      "id": "REQ-16",
-      "summary": "Add a clearly visible \"Super Admin Login\" control on the Shop Login screen that navigates to /auth/admin/login without affecting existing shop auth actions.",
+      "id": "REQ-18",
+      "summary": "Add a Super Admin bootstrap/reset control in the admin area and surface explicit authorization/error states when the shop list cannot be loaded, refetching shops after successful recovery.",
       "acceptanceCriteria": [
-        "On \"/auth/shop/login\", a clearly visible control labeled \"Super Admin Login\" is present without needing to scroll.",
-        "Activating \"Super Admin Login\" navigates to \"/auth/admin/login\" and renders the existing AdminLoginPage.",
-        "Existing Shop Login and Create New Shop Account actions continue to work as before."
+        "On the Super Admin shops page, if loading the shop list fails (e.g., Unauthorized), the UI shows an explicit error state in English (not just \"No shops registered yet\").",
+        "Provide a clear, intentional UI control in the admin auth/admin area (e.g., AdminLoginPage or AdminHomePage) to trigger the backend bootstrap/reset method when appropriate, and display success/failure feedback using existing toast patterns.",
+        "After a successful bootstrap/reset action, the admin shop list query is refetched and the created shops become visible without a hard refresh.",
+        "No changes are made to files under frontend/src/components/ui or any other immutable paths listed in SYSTEM_CONTEXT."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/auth/ShopLoginPage.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add a prominent navigation control labeled \"Super Admin Login\" (e.g., an additional Button in the existing CardContent) that uses the existing TanStack Router navigate() to route to \"/auth/admin/login\"; keep all user-facing text in English and do not modify any files under frontend/src/components/ui."
+          "description": "Add a React Query mutation hook for the backend resetSuperAdmin capability (e.g., useResetSuperAdmin) that uses existing toast patterns for success/failure feedback and invalidates/refetches the admin shop list query (and any relevant admin/auth queries). Use the selected \"authorization\" component guidance for handling authorization failures gracefully in the UI; verify the component's usage instructions before implementing. Also adjust the getAllShops query options to avoid masking failures (ensure errors propagate and are not silently treated as an empty shop list)."
+        },
+        {
+          "path": "frontend/src/pages/admin/ShopsAdminPage.tsx",
+          "operation": "modify",
+          "description": "Update the Super Admin shops page to render an explicit error state when useGetAllShops fails (e.g., Unauthorized), including clear English messaging and a recovery call-to-action that triggers the new reset/bootstrap mutation and shows toast feedback. After a successful reset, refetch/invalidate the shop list so shops become visible without a hard refresh. Use the selected \"authorization\" component guidance for presenting access denied/authorization error states; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/admin/AdminHomePage.tsx",
+          "operation": "modify",
+          "description": "Add a clear, intentional admin-area control to trigger the bootstrap/reset flow (e.g., a \"Recover Super Admin Access\" card/button). Wire it to the new reset/bootstrap mutation hook and display success/failure via existing toast patterns. Optionally gate visibility messaging using existing admin checks (e.g., useIsCallerAdmin) so the control is presented \"when appropriate\" without adding new routes. Use the selected \"authorization\" component guidance for role-based access UX; verify the component's usage instructions before implementing."
         }
       ]
     }

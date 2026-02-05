@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useGetAllShops, useSuspendShop, useReactivateShop } from '../../hooks/useQueries';
-import { Building2, Ban, CheckCircle } from 'lucide-react';
+import { useGetAllShops, useSuspendShop, useReactivateShop, useResetSuperAdmin } from '../../hooks/useQueries';
+import { Building2, Ban, CheckCircle, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
@@ -17,15 +17,93 @@ import {
 } from '@/components/ui/alert-dialog';
 
 export default function ShopsAdminPage() {
-  const { data: shops = [], isLoading } = useGetAllShops();
+  const { data: shops = [], isLoading, isError, error, refetch } = useGetAllShops();
   const suspendShop = useSuspendShop();
   const reactivateShop = useReactivateShop();
+  const resetSuperAdmin = useResetSuperAdmin();
+
+  const handleResetSuperAdmin = async () => {
+    await resetSuperAdmin.mutateAsync();
+    refetch();
+  };
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-10 w-64" />
         <Skeleton className="h-96" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    const errorMessage = error?.message || 'Failed to load shops';
+    const isUnauthorized = errorMessage.includes('Unauthorized') || errorMessage.includes('Only super-admins');
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Building2 className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold tracking-tight">Shop Management</h1>
+        </div>
+
+        <Card className="border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center justify-center space-y-4 py-8">
+              <div className="rounded-full bg-destructive/10 p-3">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
+              </div>
+              <div className="text-center space-y-2">
+                <h3 className="text-lg font-semibold">Access Denied</h3>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  {isUnauthorized
+                    ? 'You do not have super-admin privileges. Only super-admins can view and manage shops.'
+                    : errorMessage}
+                </p>
+              </div>
+
+              {isUnauthorized && (
+                <div className="flex flex-col items-center gap-3 pt-4">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="default" className="gap-2">
+                        <ShieldAlert className="h-4 w-4" />
+                        Recover Super Admin Access
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Recover Super Admin Access</AlertDialogTitle>
+                        <AlertDialogDescription className="space-y-2">
+                          <p>
+                            This will grant super-admin privileges to your current account, but only if no
+                            super-admin exists in the system.
+                          </p>
+                          <p className="font-medium text-foreground">
+                            If a super-admin already exists, this operation will fail and you must contact the
+                            existing super-admin for access.
+                          </p>
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleResetSuperAdmin}
+                          disabled={resetSuperAdmin.isPending}
+                        >
+                          {resetSuperAdmin.isPending ? 'Processing...' : 'Grant Access'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <p className="text-xs text-muted-foreground">
+                    This is a bootstrap recovery feature for initial setup
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

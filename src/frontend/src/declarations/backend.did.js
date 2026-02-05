@@ -27,6 +27,7 @@ export const Shop = IDL.Record({
 export const UserProfile = IDL.Record({
   'shopId' : IDL.Opt(ShopId),
   'name' : IDL.Text,
+  'isSuperAdmin' : IDL.Bool,
   'email' : IDL.Text,
 });
 export const Product = IDL.Record({
@@ -97,6 +98,7 @@ export const idlService = IDL.Service({
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'reactivateShop' : IDL.Func([ShopId], [], []),
+  'resetSuperAdmin' : IDL.Func([], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'suspendShop' : IDL.Func([ShopId], [], []),
   'updateProduct' : IDL.Func([ProductId, IDL.Text, IDL.Text, IDL.Nat], [], []),
@@ -125,6 +127,7 @@ export const idlFactory = ({ IDL }) => {
   const UserProfile = IDL.Record({
     'shopId' : IDL.Opt(ShopId),
     'name' : IDL.Text,
+    'isSuperAdmin' : IDL.Bool,
     'email' : IDL.Text,
   });
   const Product = IDL.Record({
@@ -195,6 +198,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'reactivateShop' : IDL.Func([ShopId], [], []),
+    'resetSuperAdmin' : IDL.Func([], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'suspendShop' : IDL.Func([ShopId], [], []),
     'updateProduct' : IDL.Func(

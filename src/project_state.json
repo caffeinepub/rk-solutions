@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
+  "projectStateVersion": 11,
   "summary": "MVP for RK Solutions: a SaaS-based, multi-tenant inventory management system with an offline-first Android app (auto-sync + conflict handling) and a desktop-friendly web app. Each shop is its own tenant with email/password auth, product CRUD, stock tracking with sale-triggered decrements, low-stock alerts, search/filtering, manual stock-in, and a simple dashboard. A separate super-admin can manage tenant accounts/users (suspend/reactivate, reset passwords, view sign-ups/access logs) without accessing shop inventory.",
   "architectural_notes": [
     "Cross-platform MVP: offline-first Android app + desktop-friendly web app + cloud SaaS backend.",
@@ -17,7 +17,8 @@
     "Offline conflict resolution may cause overwrites in edge cases; needs a clear MVP policy and user expectations.",
     "Shop sign-up is currently blocked until Internet Identity (II) authentication is configured/enabled.",
     "Shop self-sign-up/tenant creation is returning \"Unauthorized: Only super-admins can perform this action\"—tenant creation is incorrectly restricted to super-admin.",
-    "Super Admin Login entry/link is not visible on the login screen in the current build; users cannot access the super-admin portal from the UI."
+    "Super Admin Login entry/link is not visible on the login screen in the current build; users cannot access the super-admin portal from the UI.",
+    "Super Admin portal shows no created shops even when logged in as super-admin (likely super-admin flag/recognition or shop listing issue)."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -124,6 +125,14 @@
         "REQ-16"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-super-admin-web-ui-to-support-the-admin-reset-bootstrap-flow-and-make-authorization-failures-visible-when-shops-cannot-be-loaded",
+      "title": "Update the Super Admin web UI to support the admin reset/bootstrap flow and make authorization failures visible when shops cannot be loaded.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -227,6 +236,20 @@
       "id": "AR-16",
       "summary": "Make Super Admin portal entry point visible in the web UI (move/add a clear “Super Admin Login” button/link on the auth/login screen, e.g., header/top-right or prominent placement).",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Reset or recreate the super-admin account (ensure admin recognition via isSuperAdmin flag) and restore visibility of created shops in the Super Admin portal",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Implement a backend \"super-admin reset\" / bootstrap mechanism so an operator can recover admin access when the current Internet Identity principal is not recognized as a super-admin, enabling the Super Admin portal to list shops again.",
+      "reqIds": [
+        "REQ-17"
+      ],
       "status": "pending"
     }
   ],

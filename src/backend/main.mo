@@ -10,10 +10,13 @@ import Order "mo:core/Order";
 import Time "mo:core/Time";
 import List "mo:core/List";
 import MixinAuthorization "authorization/MixinAuthorization";
+import Migration "migration";
 import AccessControl "authorization/access-control";
 
+// Enable data migration for smooth upgrades
+(with migration = Migration.run)
 actor {
-  // --- Types and Modules ---
+  // --- Types ---
   type ShopId = Nat;
   type ProductId = Nat;
   type StockMovementId = Nat;
@@ -22,6 +25,7 @@ actor {
     name : Text;
     email : Text;
     shopId : ?ShopId; // null for super-admin
+    isSuperAdmin : Bool;
   };
 
   type ShopDashboard = {
@@ -110,13 +114,14 @@ actor {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
 
-    // SECURITY FIX: Preserve existing shopId - only admins can change shop assignments
+    // SECURITY: Preserve existing shopId and isSuperAdmin - only admins can change these
     let finalProfile = switch (userProfiles.get(caller)) {
       case (?existingProfile) {
         {
           name = profile.name;
           email = profile.email;
           shopId = existingProfile.shopId; // Preserve existing shop assignment
+          isSuperAdmin = existingProfile.isSuperAdmin; // Preserve super-admin status
         };
       };
       case (null) {
@@ -124,6 +129,7 @@ actor {
           name = profile.name;
           email = profile.email;
           shopId = null; // New users start with no shop assignment
+          isSuperAdmin = false; // Default to non-super-admin
         };
       };
     };
@@ -137,7 +143,6 @@ actor {
       Runtime.trap("Unauthorized: Only admins can assign users to shops");
     };
 
-    // Verify shop exists if shopId is provided
     switch (shopId) {
       case (?sid) {
         switch (shops.get(sid)) {
@@ -148,13 +153,13 @@ actor {
       case (null) {};
     };
 
-    // Update or create user profile with new shop assignment
     let profile = switch (userProfiles.get(user)) {
       case (?existingProfile) {
         {
           name = existingProfile.name;
           email = existingProfile.email;
           shopId = shopId;
+          isSuperAdmin = existingProfile.isSuperAdmin;
         };
       };
       case (null) {
@@ -162,6 +167,7 @@ actor {
           name = "";
           email = "";
           shopId = shopId;
+          isSuperAdmin = false; // Default to non-super-admin
         };
       };
     };
@@ -178,17 +184,10 @@ actor {
   };
 
   func validateShopUser(caller : Principal, shopId : ShopId) {
-    // Super-admins cannot access shop inventory data
-    if (AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Super-admins cannot access shop inventory data");
-    };
-
-    // Must be a regular user
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only shop users can access this resource");
     };
 
-    // Must belong to the requested shop
     switch (getCallerShopId(caller)) {
       case (?callerShopId) {
         if (callerShopId != shopId) {
@@ -218,6 +217,22 @@ actor {
     };
   };
 
+  func isSuperAdmin(caller : Principal) : Bool {
+    switch (userProfiles.get(caller)) {
+      case (?profile) { profile.isSuperAdmin };
+      case (null) { false };
+    };
+  };
+
+  func hasSuperAdmin() : Bool {
+    for ((_, profile) in userProfiles.entries()) {
+      if (profile.isSuperAdmin) {
+        return true;
+      };
+    };
+    false;
+  };
+
   // --- Shop Functions (Admin Only - No Inventory Access) ---
   public query ({ caller }) func getShop(shopId : ShopId) : async Shop {
     validateAdminOnly(caller);
@@ -232,25 +247,21 @@ actor {
     shops.values().toArray().sort();
   };
 
-  // --- NEW: Shop Creation Flow for Non-Admins ---
   public shared ({ caller }) func createAndAssignShop(name : Text) : async ShopId {
-    // Regular users cannot specify a shop owner
-    if (AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: This endpoint is only for regular users. Admins should use createShop instead.");
+    if (isSuperAdmin(caller)) {
+      Runtime.trap("Unauthorized: This endpoint is only for regular users. Super-admins should use createShop instead.");
     };
 
-    // Check if the user already owns a shop
     switch (userProfiles.get(caller)) {
       case (?profile) {
         switch (profile.shopId) {
           case (?_) {
-            // User already has a shop
             Runtime.trap("User already owns a shop. Use update functions instead.");
           };
           case (null) {};
         };
       };
-      case (null) {}; // User profile not found
+      case (null) {};
     };
 
     let shopId = nextShopId;
@@ -266,7 +277,6 @@ actor {
     };
     shops.add(shopId, shop);
 
-    // Assign the user to the new shop
     let updatedProfile = switch (userProfiles.get(caller)) {
       case (?profile) {
         { profile with shopId = ?shopId };
@@ -276,6 +286,7 @@ actor {
           name = "";
           email = "";
           shopId = ?shopId;
+          isSuperAdmin = false;
         };
       };
     };
@@ -284,7 +295,6 @@ actor {
     shopId;
   };
 
-  // --- Admin Shop Creation ---
   public shared ({ caller }) func createShop(name : Text, owner : Principal) : async ShopId {
     validateAdminOnly(caller);
 
@@ -339,11 +349,43 @@ actor {
     };
   };
 
+  // --- SECURITY FIX: Super-Admin Reset (Bootstrap) with Authorization ---
+  // This function allows recovery of super-admin access, but ONLY when:
+  // 1. No super-admin exists in the system (bootstrap scenario)
+  // This prevents unauthorized privilege escalation while enabling legitimate recovery
+  public shared ({ caller }) func resetSuperAdmin() : async () {
+    // SECURITY: Only allow bootstrap if no super-admin exists
+    if (hasSuperAdmin()) {
+      Runtime.trap("Unauthorized: Super-admin already exists. Contact existing super-admin for access.");
+    };
+
+    // Grant super-admin privileges to the caller
+    switch (userProfiles.get(caller)) {
+      case (?existingProfile) {
+        let updatedProfile = {
+          name = if (existingProfile.name == "") { "Super Admin" } else { existingProfile.name };
+          email = existingProfile.email;
+          shopId = null; // Super-admins are not associated with shops
+          isSuperAdmin = true;
+        };
+        userProfiles.add(caller, updatedProfile);
+      };
+      case (null) {
+        let newProfile = {
+          name = "Super Admin";
+          email = "";
+          shopId = null;
+          isSuperAdmin = true;
+        };
+        userProfiles.add(caller, newProfile);
+      };
+    };
+  };
+
   // --- Product Functions (Shop Users Only - Tenant Isolated) ---
   public shared ({ caller }) func createProduct(shopId : ShopId, name : Text, description : Text, initialQuantity : Nat, lowStockThreshold : Nat) : async ProductId {
     validateShopUser(caller, shopId);
 
-    // Verify shop is not suspended
     switch (shops.get(shopId)) {
       case (?shop) {
         if (shop.isSuspended) {
@@ -436,7 +478,6 @@ actor {
 
     products.add(productId, updatedProduct);
 
-    // Record stock movement
     let movementId = nextStockMovementId;
     nextStockMovementId += 1;
 

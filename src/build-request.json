@@ -1,40 +1,70 @@
 {
   "kind": "build_request",
-  "title": "Make Super Admin Login entry visible on Shop Login screen",
+  "title": "Add super-admin reset/bootstrapping and improve admin shop list error visibility",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-16",
-      "text": "Update the shop authentication UI so the Super Admin portal is reachable from the Shop Login screen by adding a clearly visible \"Super Admin Login\" navigation control that routes to \"/auth/admin/login\".",
-      "target": "frontend",
+      "id": "REQ-17",
+      "text": "Implement a backend \"super-admin reset\" / bootstrap mechanism so an operator can recover admin access when the current Internet Identity principal is not recognized as a super-admin, enabling the Super Admin portal to list shops again.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-4",
-          "msg-8",
-          "msg-9"
+          "msg-1"
         ],
         "quotes": [
-          "Super Admin Login isn't there",
-          "move it"
+          "reset"
         ]
       },
       "acceptanceCriteria": [
-        "On \"/auth/shop/login\", a clearly visible control labeled \"Super Admin Login\" is present without needing to scroll.",
-        "Activating \"Super Admin Login\" navigates to \"/auth/admin/login\" and renders the existing AdminLoginPage.",
-        "Existing Shop Login and Create New Shop Account actions continue to work as before."
+        "A new backend method exists that can promote the caller to super-admin when (and only when) there is currently no super-admin configured (bootstrap-only recovery).",
+        "If at least one super-admin already exists, the bootstrap/reset method must reject/trap with a clear English error message indicating it is not allowed.",
+        "After successful bootstrap, admin-only endpoints (e.g., getAllShops) succeed for that principal and return the actual shop list.",
+        "The implementation remains compatible with the existing single-actor architecture (all logic in backend/main.mo)."
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "text": "Update the Super Admin web UI to support the admin reset/bootstrap flow and make authorization failures visible when shops cannot be loaded.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "reset"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On the Super Admin shops page, if loading the shop list fails (e.g., Unauthorized), the UI shows an explicit error state in English (not just \"No shops registered yet\").",
+        "Provide a clear, intentional UI control in the admin auth/admin area (e.g., AdminLoginPage or AdminHomePage) to trigger the backend bootstrap/reset method when appropriate, and display success/failure feedback using existing toast patterns.",
+        "After a successful bootstrap/reset action, the admin shop list query is refetched and the created shops become visible without a hard refresh.",
+        "No changes are made to files under frontend/src/components/ui or any other immutable paths listed in SYSTEM_CONTEXT."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (Shadcn components are read-only).",
-    "Keep all user-facing text in English."
+    "Backend must remain a single Motoko actor with all logic in backend/main.mo.",
+    "Only generate backend/migration.mo if an upgrade requires state migration; otherwise do not add migration code.",
+    "Do not edit immutable frontend paths (frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Do not change backend authentication/authorization logic.",
-    "Do not change admin portal functionality beyond making its entry point visible."
+    "Changing tenant/shop creation rules (e.g., allowing one user to own multiple shops).",
+    "Adding external authentication providers beyond the existing Internet Identity approach.",
+    "Adding new admin features unrelated to recovering admin recognition or improving shop list visibility."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

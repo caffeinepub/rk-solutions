@@ -1,34 +1,54 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-05T19:46:14.576Z",
+  "generatedAt": "2026-02-05T20:08:57.205Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
+    "total": 2,
     "implemented": 1,
     "items": [
       {
-        "id": "REQ-16",
-        "summary": "Update the shop authentication UI so the Super Admin portal is reachable from the Shop Login screen by adding a clearly visible \"Super Admin Login\" navigation control that routes to \"/auth/admin/login\".",
+        "id": "REQ-17",
+        "summary": "Implement a backend \"super-admin reset\" / bootstrap mechanism so an operator can recover admin access when the current Internet Identity principal is not recognized as a super-admin, enabling the Super Admin portal to list shops again.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-18",
+        "summary": "Update the Super Admin web UI to support the admin reset/bootstrap flow and make authorization failures visible when shops cannot be loaded.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/auth/ShopLoginPage.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/admin/ShopsAdminPage.tsx",
+          "frontend/src/pages/admin/AdminHomePage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/auth/ShopLoginPage.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/admin/ShopsAdminPage.tsx",
+          "frontend/src/pages/admin/AdminHomePage.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/pages/auth/ShopLoginPage.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/auth/ProfileSetupModal.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/admin/AdminHomePage.tsx",
+    "frontend/src/pages/admin/ShopsAdminPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

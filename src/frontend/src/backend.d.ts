@@ -47,6 +47,7 @@ export interface StockMovement {
 export interface UserProfile {
     shopId?: ShopId;
     name: string;
+    isSuperAdmin: boolean;
     email: string;
 }
 export interface ShopDashboard {
@@ -83,6 +84,7 @@ export interface backendInterface {
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     reactivateShop(shopId: ShopId): Promise<void>;
+    resetSuperAdmin(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     suspendShop(shopId: ShopId): Promise<void>;
     updateProduct(productId: ProductId, name: string, description: string, lowStockThreshold: bigint): Promise<void>;
